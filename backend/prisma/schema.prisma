@@ -1,0 +1,121 @@
+// Prisma Schema for Chatwoot Automation Compiler
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Usuario do sistema SaaS
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Configurações do Chatwoot
+  chatwootConfigs ChatwootConfig[]
+
+  // Textos submetidos para análise
+  submissions     Submission[]
+
+  @@map("users")
+}
+
+// Configurações do Chatwoot por usuário
+model ChatwootConfig {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Dados de conexão com o Chatwoot
+  chatwootUrl     String   // Ex: https://app.chatwoot.com
+  accountId       String   // ID da conta no Chatwoot
+  apiAccessToken  String   // Token de acesso
+
+  // Metadados
+  name            String   // Nome descritivo da configuração (ex: "Clube Esmeraldas")
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Submissões relacionadas a esta configuração
+  submissions     Submission[]
+
+  @@map("chatwoot_configs")
+}
+
+// Texto submetido para análise
+model Submission {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  configId        String
+  config          ChatwootConfig @relation(fields: [configId], references: [id], onDelete: Cascade)
+
+  // Texto original
+  originalText    String   @db.Text
+
+  // Metadados
+  title           String   // Título descritivo
+  status          SubmissionStatus @default(PROCESSING)
+
+  // Provider de IA usado
+  aiProvider      String   // groq, openai, anthropic
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Automações geradas
+  automations     Automation[]
+
+  @@map("submissions")
+}
+
+enum SubmissionStatus {
+  PROCESSING    // IA está processando
+  COMPLETED     // Processamento concluído
+  FAILED        // Falha no processamento
+}
+
+// Automação gerada pela IA
+model Automation {
+  id              String   @id @default(cuid())
+  submissionId    String
+  submission      Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  // Dados da automação
+  name            String
+  description     String   @db.Text
+  eventName       String   // message_created, conversation_created, etc.
+
+  // Condições e ações (JSON)
+  conditions      Json     // Array de condições
+  actions         Json     // Array de ações
+
+  // Status
+  status          AutomationStatus @default(DRAFT)
+  active          Boolean  @default(true)
+
+  // ID da automação no Chatwoot (quando enviada)
+  chatwootRuleId  String?
+
+  // Metadados
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  sentAt          DateTime? // Data de envio ao Chatwoot
+
+  @@map("automations")
+}
+
+enum AutomationStatus {
+  DRAFT         // Criada mas não enviada ao Chatwoot
+  SENT          // Enviada ao Chatwoot
+  ERROR         // Erro ao enviar
+}
