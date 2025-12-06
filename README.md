@@ -93,7 +93,13 @@ Acesse: **http://localhost:3000**
 
 ## 📚 Documentação Completa
 
-- [📖 Guia de Instalação Completo](INSTALACAO.md)
+### Instalação e Deploy
+- [⚡ Quick Start - Deploy no CyberPanel](QUICK_START.md) **← Comece aqui para produção!**
+- [🚀 Deploy Detalhado no CyberPanel](DEPLOY_CYBERPANEL.md)
+- [🔧 Configuração do OpenLiteSpeed](OPENLITESPEED_CONFIG.md)
+- [📖 Guia de Instalação Local](INSTALACAO.md)
+
+### Uso
 - [📘 Como Usar o Sistema](COMO_USAR.md)
 - [📝 Exemplo de Texto para Testar](EXEMPLO_TEXTO.md)
 
@@ -181,6 +187,21 @@ Gerencie múltiplas contas do Chatwoot (multi-tenant).
 
 ## 🚀 Deploy em Produção
 
+### CyberPanel (Recomendado)
+
+Para deploy no CyberPanel com Git, siga o [Quick Start Guide](QUICK_START.md):
+
+```bash
+# No servidor
+cd /home/seu-dominio.com/public_html
+git clone -b claude/chatwoot-automation-compiler-0147Nk23Rvqp4vad8b4MBxRE <repo-url> .
+bash deploy.sh  # Script automático que faz tudo!
+```
+
+Ver guia completo: [DEPLOY_CYBERPANEL.md](DEPLOY_CYBERPANEL.md)
+
+### Servidor VPS/Dedicado
+
 ```bash
 # Build
 npm run build
@@ -189,6 +210,8 @@ npm run build
 cd backend
 npm install -g pm2
 pm2 start dist/index.js --name chatwoot-automation
+pm2 save
+pm2 startup
 ```
 
 ## 🤝 Contribuindo
