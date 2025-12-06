@@ -1,0 +1,12 @@
+RewriteEngine On
+
+# Redireciona requisições de API para os respectivos arquivos PHP
+RewriteRule ^api/auth(/.*)?$ api/auth.php [L,QSA]
+RewriteRule ^api/chatwoot-configs(/.*)?$ api/chatwoot-configs.php [L,QSA]
+RewriteRule ^api/submissions(/.*)?$ api/submissions.php [L,QSA]
+RewriteRule ^api/automations(/.*)?$ api/automations.php [L,QSA]
+
+# Redireciona todas as outras requisições para index.php (SPA)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^.*$ index.php [L,QSA]
